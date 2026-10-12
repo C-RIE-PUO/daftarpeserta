@@ -46,7 +46,7 @@
     <section id="tab1" class="tab-content bg-white p-6 rounded-2xl shadow-md">
       <div class="mb-6">
         <h2 class="text-xl font-bold text-slate-800 mb-1">Pendaftaran Kehadiran Peserta</h2>
-        <p class="text-sm text-slate-500">Cari mengikut <strong>PROJEK ID (Lajur C)</strong> atau <strong>Nama Pelajar</strong>. Setiap pelajar dipaparkan mengikut susunan baris sepadan dalam Google Sheet.</p>
+        <p class="text-sm text-slate-500">Cari mengikut <strong>PROJEK ID (Lajur C)</strong> atau <strong>Nama Pelajar</strong>.</p>
       </div>
 
       <div class="relative mb-6">
@@ -77,11 +77,23 @@
       <div class="mb-6 flex flex-col md:flex-row justify-between md:items-center gap-4">
         <div>
           <h2 class="text-xl font-bold text-slate-800 mb-1">Pengesahan Kehadiran Urusetia</h2>
-          <p class="text-sm text-slate-500">Sahkan pendaftaran peserta di Lajur L.</p>
+          <p class="text-sm text-slate-500">Sahkan pendaftaran peserta di Lajur L & semak ketersediaan sijil (Lajur N, O, P).</p>
         </div>
-        <div class="flex items-center gap-2 bg-amber-50 p-3 rounded-xl border border-amber-200">
-          <i class="fa-solid fa-key text-amber-600"></i>
-          <input type="password" id="adminPwd" placeholder="Kata Laluan Admin" class="px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none">
+        
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <!-- Panel Kawalan Carian Sijil Admin -->
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <span class="text-xs font-bold text-slate-700">Carian Sijil (Tab 3):</span>
+            <span id="badgeCertStatus" class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">ON</span>
+            <button onclick="toggleCertSearchStatus()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs px-2.5 py-1 rounded-lg font-medium transition">
+              Tukar (ON/OFF)
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+            <i class="fa-solid fa-key text-amber-600"></i>
+            <input type="password" id="adminPwd" placeholder="Kata Laluan Admin" class="px-3 py-1 border border-slate-300 rounded-lg text-sm focus:outline-none">
+          </div>
         </div>
       </div>
 
@@ -92,12 +104,15 @@
               <th class="p-3">Projek ID</th>
               <th class="p-3">Nama Pelajar</th>
               <th class="p-3">Masa Daftar (Lajur K)</th>
-              <th class="p-3">Status Pengesahan (Lajur L)</th>
-              <th class="p-3 text-center">Tindakan Pengesahan</th>
+              <th class="p-3">Pengesahan (Lajur L)</th>
+              <th class="p-3">Sijil Penyertaan (Lajur N)</th>
+              <th class="p-3">Sijil Emas/Perak/Gangsa (Lajur O)</th>
+              <th class="p-3">Sijil Anugerah (Lajur P)</th>
+              <th class="p-3 text-center">Tindakan</th>
             </tr>
           </thead>
           <tbody id="tableBodyAdmin" class="divide-y divide-slate-100">
-            <tr><td colspan="5" class="p-6 text-center text-slate-400">Sedang memuatkan data...</td></tr>
+            <tr><td colspan="8" class="p-6 text-center text-slate-400">Sedang memuatkan data...</td></tr>
           </tbody>
         </table>
       </div>
@@ -107,14 +122,19 @@
     <section id="tab3" class="tab-content hidden bg-white p-8 rounded-2xl shadow-md max-w-2xl mx-auto">
       <div class="text-center mb-8">
         <i class="fa-solid fa-file-pdf text-red-500 text-5xl mb-3"></i>
-        <h2 class="text-2xl font-bold text-slate-800">Muat Turun Sijil Penyertaan</h2>
-        <p class="text-sm text-slate-500 mt-1">Masukkan <strong>PROJEK ID</strong> atau <strong>NO. MATRIK</strong> anda.</p>
+        <h2 class="text-2xl font-bold text-slate-800">Muat Turun Sijil</h2>
+        <p class="text-sm text-slate-500 mt-1">Masukkan <strong>PROJEK ID</strong> (contoh: JKE02) atau <strong>NO. MATRIK</strong> anda.</p>
       </div>
 
-      <div class="space-y-4">
+      <!-- Mesej Amaran jika Carian Ditutup oleh Admin -->
+      <div id="certSearchDisabledBox" class="hidden mb-6 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-center text-sm font-semibold">
+        <i class="fa-solid fa-lock text-amber-600 mr-2"></i> Access Carian & Muat Turun Sijil DITUTUP sementara oleh Urusetia.
+      </div>
+
+      <div id="certSearchContainer" class="space-y-4">
         <div>
           <label class="block text-sm font-semibold text-slate-700 mb-1">PROJEK ID / NO. MATRIK</label>
-          <input type="text" id="certSearchInput" placeholder="Contoh: PRJ-001" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <input type="text" id="certSearchInput" placeholder="Contoh: JKE02" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
         </div>
         <button onclick="checkCert()" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-md flex justify-center items-center gap-2 transition">
           <i class="fa-solid fa-magnifying-glass"></i> Semak & Cari Sijil
@@ -127,276 +147,374 @@
   </main>
 
   <script>
-  const API_URL = 'https://script.google.com/macros/s/AKfycby3PdAsdtJ7mWwcbrUGlB8-CWB0E8534eEUeEP6OB-LyQ3h109p5jZEONDIZajrUr1C/exec'; 
-  let participantsData = [];
+    const API_URL = 'https://script.google.com/macros/s/AKfycby3PdAsdtJ7mWwcbrUGlB8-CWB0E8534eEUeEP6OB-LyQ3h109p5jZEONDIZajrUr1C/exec'; 
+    let participantsData = [];
+    let certSearchGlobalStatus = 'ON';
 
-  window.onload = function() {
-    loadData();
-  };
+    window.onload = function() {
+      loadData();
+    };
 
-  function switchTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-    document.querySelectorAll('.tab-btn').forEach(el => {
-      el.classList.remove('bg-blue-100', 'text-blue-900');
-      el.classList.add('text-slate-600');
-    });
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(el => {
+        el.classList.remove('bg-blue-100', 'text-blue-900');
+        el.classList.add('text-slate-600');
+      });
 
-    document.getElementById(tabId).classList.remove('hidden');
-    const activeBtn = document.getElementById('btn' + tabId.charAt(0).toUpperCase() + tabId.slice(1));
-    activeBtn.classList.add('bg-blue-100', 'text-blue-900');
-  }
+      document.getElementById(tabId).classList.remove('hidden');
+      const activeBtn = document.getElementById('btn' + tabId.charAt(0).toUpperCase() + tabId.slice(1));
+      activeBtn.classList.add('bg-blue-100', 'text-blue-900');
 
-  function showAlert(msg, isSuccess = true) {
-    const box = document.getElementById('alertBox');
-    box.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-800', 'bg-rose-100', 'text-rose-800');
-    box.classList.add(isSuccess ? 'bg-emerald-100' : 'bg-rose-100', isSuccess ? 'text-emerald-800' : 'text-rose-800');
-    box.innerHTML = `<i class="fa-solid ${isSuccess ? 'fa-circle-check' : 'fa-circle-exclamation'} mr-2"></i> ${msg}`;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+      if (tabId === 'tab3') {
+        updateTab3SearchUI();
+      }
+    }
 
-  async function loadData() {
-    try {
-      const res = await fetch(`${API_URL}?action=getParticipants`);
-      const json = await res.json();
-      if (json.success) {
-        participantsData = json.data;
-        renderTables();
+    function showAlert(msg, isSuccess = true) {
+      const box = document.getElementById('alertBox');
+      box.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-800', 'bg-rose-100', 'text-rose-800');
+      box.classList.add(isSuccess ? 'bg-emerald-100' : 'bg-rose-100', isSuccess ? 'text-emerald-800' : 'text-rose-800');
+      box.innerHTML = `<i class="fa-solid ${isSuccess ? 'fa-circle-check' : 'fa-circle-exclamation'} mr-2"></i> ${msg}`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch(`${API_URL}?action=getParticipants`);
+        const json = await res.json();
+        if (json.success) {
+          participantsData = json.data;
+          certSearchGlobalStatus = json.certSearchStatus || 'ON';
+          updateAdminCertControlUI();
+          renderTables();
+        } else {
+          showAlert('Gagal membaca data: ' + json.message, false);
+        }
+      } catch (err) {
+        showAlert('Ralat sambungan: ' + err.message, false);
+      }
+    }
+
+    function updateAdminCertControlUI() {
+      const badge = document.getElementById('badgeCertStatus');
+      if (certSearchGlobalStatus === 'ON') {
+        badge.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800';
+        badge.innerText = 'ON (DIBUKA)';
       } else {
-        showAlert('Gagal membaca data: ' + json.message, false);
+        badge.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800';
+        badge.innerText = 'OFF (DITUTUP)';
       }
-    } catch (err) {
-      showAlert('Ralat sambungan: ' + err.message, false);
+      updateTab3SearchUI();
     }
-  }
 
-  function renderTables() {
-    renderJkTable(participantsData);
-    renderAdminTable(participantsData);
-  }
-
-  // Pembersihan format tarikh supaya sentiasa memaparkan DD/MM/YYYY HH:mm:ss
-  function formatCleanDate(str) {
-    if (!str) return '';
-    str = str.trim();
-    
-    // Mengekstrak format DD/MM/YYYY HH:mm:ss jika ada
-    const match = str.match(/\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}(:\d{2})?/);
-    if (match) return match[0];
-    
-    // Jika format mengandungi string Date JS (cth: GMT+0800 / Singapore Standard Time)
-    if (str.includes('GMT') || str.includes('Singapore') || str.includes('Standard Time')) {
-      const d = new Date(str);
-      if (!isNaN(d.getTime())) {
-        const day = String(d.getDate()).padStart(2, '0');
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const year = d.getFullYear();
-        const hours = String(d.getHours()).padStart(2, '0');
-        const mins = String(d.getMinutes()).padStart(2, '0');
-        const secs = String(d.getSeconds()).padStart(2, '0');
-        return `${day}/${month}/${year} ${hours}:${mins}:${secs}`;
-      }
-    }
-    return str;
-  }
-
-  // Memisahkan senarai nama & no. matrik mengikut baris \n di Lajur H
-  function parseStudentList(namaStr, matrikStr) {
-    if (!namaStr) return [];
-    
-    let names = namaStr.includes('\n') 
-      ? namaStr.split('\n').map(s => s.trim()).filter(Boolean)
-      : namaStr.split(/,|;/).map(s => s.trim()).filter(Boolean);
-
-    let matriks = String(matrikStr || '').split(/\s+|\n|,|\|/).map(s => s.trim()).filter(s => s.length >= 6);
-
-    if (names.length === 1 && (namaStr.includes(' BIN ') || namaStr.includes(' BINTI '))) {
-      let regex = /([A-Z\s@']+(?:BIN|BINTI)[A-Z\s@']+?)(?=\s+[A-Z\s@']+(?:BIN|BINTI)|\$)/gi;
-      let matched = namaStr.match(regex);
-      if (matched && matched.length > 0) {
-        names = matched.map(s => s.trim());
+    function updateTab3SearchUI() {
+      const disabledBox = document.getElementById('certSearchDisabledBox');
+      const searchContainer = document.getElementById('certSearchContainer');
+      if (certSearchGlobalStatus === 'OFF') {
+        disabledBox.classList.remove('hidden');
+        searchContainer.classList.add('opacity-50', 'pointer-events-none');
+      } else {
+        disabledBox.classList.add('hidden');
+        searchContainer.classList.remove('opacity-50', 'pointer-events-none');
       }
     }
 
-    return names.map((name, idx) => ({
-      nama: name,
-      matrik: matriks[idx] || ''
-    }));
-  }
-
-  function renderJkTable(data) {
-    const tbody = document.getElementById('tableBodyJk');
-    if (!data || data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">Tiada rekod dijumpai.</td></tr>';
-      return;
+    async function toggleCertSearchStatus() {
+      const pwd = document.getElementById('adminPwd').value;
+      if (!pwd) {
+        alert('Sila masukkan Kata Laluan Admin terlebih dahulu!');
+        return;
+      }
+      const newTargetStatus = certSearchGlobalStatus === 'ON' ? 'OFF' : 'ON';
+      try {
+        const res = await fetch(`${API_URL}?action=toggleCertSearch&password=${encodeURIComponent(pwd)}&status=${newTargetStatus}`);
+        const json = await res.json();
+        showAlert(json.message, json.success);
+        if (json.success) {
+          certSearchGlobalStatus = json.status;
+          updateAdminCertControlUI();
+        }
+      } catch (err) {
+        showAlert('Ralat menukar status: ' + err.message, false);
+      }
     }
 
-    let html = '';
-    data.forEach(item => {
-      const students = parseStudentList(item.namaPelajar, item.noMatrik);
-      const registerLog = item.tarikhMasaDaftar || '';
-      const logLines = registerLog.split('\n').map(l => l.trim());
+    function renderTables() {
+      renderJkTable(participantsData);
+      renderAdminTable(participantsData);
+    }
 
-      students.forEach((student, sIdx) => {
-        // Ambil baris tarikh terus dari log
-        let rawTimestamp = logLines[sIdx] || '';
+    function formatCleanDate(str) {
+      if (!str) return '';
+      str = str.trim();
+      const match = str.match(/\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}(:\d{2})?/);
+      if (match) return match[0];
+      
+      if (str.includes('GMT') || str.includes('Singapore') || str.includes('Standard Time')) {
+        const d = new Date(str);
+        if (!isNaN(d.getTime())) {
+          const day = String(d.getDate()).padStart(2, '0');
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const year = d.getFullYear();
+          const hours = String(d.getHours()).padStart(2, '0');
+          const mins = String(d.getMinutes()).padStart(2, '0');
+          const secs = String(d.getSeconds()).padStart(2, '0');
+          return `${day}/${month}/${year} ${hours}:${mins}:${secs}`;
+        }
+      }
+      return str;
+    }
 
-        // Dapatkan tarikh & masa yang bersih tanpa pemotongan palsu
-        let studentTimestamp = formatCleanDate(rawTimestamp);
-        const isRegistered = !!studentTimestamp;
+    function parseStudentList(namaStr, matrikStr) {
+      if (!namaStr) return [];
+      
+      let names = namaStr.includes('\n') 
+        ? namaStr.split('\n').map(s => s.trim()).filter(Boolean)
+        : namaStr.split(/,|;/).map(s => s.trim()).filter(Boolean);
 
-        html += `
-          <tr class="hover:bg-slate-50 border-b">
-            <td class="p-3">
-              <span class="font-bold text-blue-900">${item.projekId}</span>
-              <div class="text-xs text-slate-400">Bil: ${item.bil}</div>
-            </td>
-            <td class="p-3">
-              <div class="font-semibold text-slate-800">${student.nama}</div>
-              <div class="text-xs text-slate-500">Matrik: ${student.matrik || item.noMatrik} | ${item.program}</div>
-            </td>
-            <td class="p-3 text-xs text-slate-600 max-w-xs truncate">${item.namaProjek}</td>
-            <td class="p-3">
-              ${isRegistered 
-                ? `<span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1"><i class="fa-solid fa-check"></i> ${studentTimestamp}</span>` 
-                : `<span class="bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full text-xs font-medium">Belum Mendaftar</span>`}
-            </td>
-            <td class="p-3 text-center">
-              <button onclick="registerStudent('${item.rowIndex}', ${sIdx})" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg shadow font-medium transition flex items-center gap-1 mx-auto">
-                <i class="fa-solid fa-user-check"></i> ${isRegistered ? 'Kemaskini Masa' : 'Daftar Pelajar Ini'}
-              </button>
-            </td>
-          </tr>
-        `;
+      let matriks = String(matrikStr || '').split(/\s+|\n|,|\|/).map(s => s.trim()).filter(s => s.length >= 6);
+
+      if (names.length === 1 && (namaStr.includes(' BIN ') || namaStr.includes(' BINTI '))) {
+        let regex = /([A-Z\s@']+(?:BIN|BINTI)[A-Z\s@']+?)(?=\s+[A-Z\s@']+(?:BIN|BINTI)|\$)/gi;
+        let matched = namaStr.match(regex);
+        if (matched && matched.length > 0) {
+          names = matched.map(s => s.trim());
+        }
+      }
+
+      return names.map((name, idx) => ({
+        nama: name,
+        matrik: matriks[idx] || ''
+      }));
+    }
+
+    function renderJkTable(data) {
+      const tbody = document.getElementById('tableBodyJk');
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">Tiada rekod dijumpai.</td></tr>';
+        return;
+      }
+
+      let html = '';
+      data.forEach(item => {
+        const students = parseStudentList(item.namaPelajar, item.noMatrik);
+        const registerLog = item.tarikhMasaDaftar || '';
+        const logLines = registerLog.split('\n').map(l => l.trim());
+
+        students.forEach((student, sIdx) => {
+          let rawTimestamp = logLines[sIdx] || '';
+          let studentTimestamp = formatCleanDate(rawTimestamp);
+          const isRegistered = !!studentTimestamp;
+
+          html += `
+            <tr class="hover:bg-slate-50 border-b">
+              <td class="p-3">
+                <span class="font-bold text-blue-900">${item.projekId}</span>
+                <div class="text-xs text-slate-400">Bil: ${item.bil}</div>
+              </td>
+              <td class="p-3">
+                <div class="font-semibold text-slate-800">${student.nama}</div>
+                <div class="text-xs text-slate-500">Matrik: ${student.matrik || item.noMatrik} | ${item.program}</div>
+              </td>
+              <td class="p-3 text-xs text-slate-600 max-w-xs truncate">${item.namaProjek}</td>
+              <td class="p-3">
+                ${isRegistered 
+                  ? `<span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1"><i class="fa-solid fa-check"></i> ${studentTimestamp}</span>` 
+                  : `<span class="bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full text-xs font-medium">Belum Mendaftar</span>`}
+              </td>
+              <td class="p-3 text-center">
+                <button onclick="registerStudent('${item.rowIndex}', ${sIdx})" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg shadow font-medium transition flex items-center gap-1 mx-auto">
+                  <i class="fa-solid fa-user-check"></i> ${isRegistered ? 'Kemaskini Masa' : 'Daftar Pelajar Ini'}
+                </button>
+              </td>
+            </tr>
+          `;
+        });
       });
-    });
-    tbody.innerHTML = html;
-  }
-
-  function filterParticipants() {
-    const q = document.getElementById('searchJk').value.toLowerCase();
-    const filtered = participantsData.filter(p => 
-      p.projekId.toLowerCase().includes(q) ||
-      p.namaPelajar.toLowerCase().includes(q) ||
-      p.noMatrik.toLowerCase().includes(q)
-    );
-    renderJkTable(filtered);
-  }
-
-  async function registerStudent(rowIndex, studentIdx) {
-    try {
-      const res = await fetch(`${API_URL}?action=registerStudent&rowIndex=${rowIndex}&studentIdx=${studentIdx}`);
-      const json = await res.json();
-      showAlert(json.message, json.success);
-      if (json.success) loadData();
-    } catch (err) {
-      showAlert('Gagal merekodkan pendaftaran: ' + err.message, false);
-    }
-  }
-
-  function renderAdminTable(data) {
-    const tbody = document.getElementById('tableBodyAdmin');
-    if (!data || data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">Tiada rekod dijumpai.</td></tr>';
-      return;
+      tbody.innerHTML = html;
     }
 
-    let html = '';
-    data.forEach(item => {
-      const students = parseStudentList(item.namaPelajar, item.noMatrik);
-      const regLines = (item.tarikhMasaDaftar || '').split('\n').map(l => l.trim());
-      const confLines = (item.tarikhMasaDisahkan || '').split('\n').map(l => l.trim());
+    function filterParticipants() {
+      const q = document.getElementById('searchJk').value.toLowerCase();
+      const filtered = participantsData.filter(p => 
+        p.projekId.toLowerCase().includes(q) ||
+        p.namaPelajar.toLowerCase().includes(q) ||
+        p.noMatrik.toLowerCase().includes(q)
+      );
+      renderJkTable(filtered);
+    }
 
-      students.forEach((student, sIdx) => {
-        const cleanRegDate = formatCleanDate(regLines[sIdx] || '');
-        const cleanConfDate = formatCleanDate(confLines[sIdx] || '');
-        const isConfirmed = !!cleanConfDate;
+    async function registerStudent(rowIndex, studentIdx) {
+      try {
+        const res = await fetch(`${API_URL}?action=registerStudent&rowIndex=${rowIndex}&studentIdx=${studentIdx}`);
+        const json = await res.json();
+        showAlert(json.message, json.success);
+        if (json.success) loadData();
+      } catch (err) {
+        showAlert('Gagal merekodkan pendaftaran: ' + err.message, false);
+      }
+    }
 
-        html += `
-          <tr class="hover:bg-slate-50 border-b">
-            <td class="p-3 font-bold text-blue-900">${item.projekId}</td>
-            <td class="p-3 font-medium text-slate-800">
-              <div>${student.nama}</div>
-              <div class="text-xs text-slate-500">Matrik: ${student.matrik || item.noMatrik}</div>
-            </td>
-            <td class="p-3 text-xs text-slate-600">${cleanRegDate || '<span class="text-rose-500">Belum Daftar</span>'}</td>
-            <td class="p-3">
-              ${isConfirmed 
-                ? `<span class="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full text-xs font-semibold"><i class="fa-solid fa-certificate"></i> ${cleanConfDate}</span>` 
-                : `<span class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full text-xs font-medium">Belum Disahkan</span>`}
-            </td>
-            <td class="p-3 text-center">
-              <button onclick="doConfirm(${item.rowIndex}, ${sIdx})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3.5 py-2 rounded-lg shadow font-medium">
-                ${isConfirmed ? 'Kemaskini Pengesahan' : 'Sahkan Kehadiran'}
-              </button>
-            </td>
-          </tr>
-        `;
+    function renderAdminTable(data) {
+      const tbody = document.getElementById('tableBodyAdmin');
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="p-6 text-center text-slate-400">Tiada rekod dijumpai.</td></tr>';
+        return;
+      }
+
+      let html = '';
+      data.forEach(item => {
+        const students = parseStudentList(item.namaPelajar, item.noMatrik);
+        const regLines = (item.tarikhMasaDaftar || '').split('\n').map(l => l.trim());
+        const confLines = (item.tarikhMasaDisahkan || '').split('\n').map(l => l.trim());
+
+        students.forEach((student, sIdx) => {
+          const cleanRegDate = formatCleanDate(regLines[sIdx] || '');
+          const cleanConfDate = formatCleanDate(confLines[sIdx] || '');
+          const isConfirmed = !!cleanConfDate;
+
+          const hasPenyertaan = !!item.linkSijil;
+          const hasEmasPerakGangsa = !!item.linkEmasPerakGangsa;
+          const hasAnugerah = !!item.linkAnugerah;
+
+          html += `
+            <tr class="hover:bg-slate-50 border-b text-xs">
+              <td class="p-3 font-bold text-blue-900">${item.projekId}</td>
+              <td class="p-3 font-medium text-slate-800">
+                <div>${student.nama}</div>
+                <div class="text-[11px] text-slate-500">Matrik: ${student.matrik || item.noMatrik}</div>
+              </td>
+              <td class="p-3 text-slate-600">${cleanRegDate || '<span class="text-rose-500">Belum Daftar</span>'}</td>
+              <td class="p-3">
+                ${isConfirmed 
+                  ? `<span class="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full font-semibold inline-flex items-center gap-1"><i class="fa-solid fa-certificate"></i> ${cleanConfDate}</span>` 
+                  : `<span class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-medium">Belum Disahkan</span>`}
+              </td>
+              
+              <!-- Lajur N: Sijil Penyertaan -->
+              <td class="p-3">
+                ${hasPenyertaan 
+                  ? `<a href="\${item.linkSijil}" target="_blank" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-2 py-1 rounded-lg font-bold inline-flex items-center gap-1 transition"><i class="fa-solid fa-file-pdf"></i> Tersedia</a>` 
+                  : `<span class="text-slate-400">Tiada</span>`}
+              </td>
+
+              <!-- Lajur O: Sijil Emas/Perak/Gangsa -->
+              <td class="p-3">
+                ${hasEmasPerakGangsa 
+                  ? `<a href="\${item.linkEmasPerakGangsa}" target="_blank" class="bg-amber-100 hover:bg-amber-200 text-amber-900 px-2 py-1 rounded-lg font-bold inline-flex items-center gap-1 transition"><i class="fa-solid fa-award text-amber-600"></i> Tersedia</a>` 
+                  : `<span class="text-slate-400">Tiada</span>`}
+              </td>
+
+              <!-- Lajur P: Sijil Anugerah -->
+              <td class="p-3">
+                ${hasAnugerah 
+                  ? `<a href="\${item.linkAnugerah}" target="_blank" class="bg-purple-100 hover:bg-purple-200 text-purple-900 px-2 py-1 rounded-lg font-bold inline-flex items-center gap-1 transition"><i class="fa-solid fa-trophy text-purple-600"></i> Tersedia</a>` 
+                  : `<span class="text-slate-400">Tiada</span>`}
+              </td>
+
+              <td class="p-3 text-center">
+                <button onclick="doConfirm(${item.rowIndex}, ${sIdx})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg shadow font-medium transition">
+                  ${isConfirmed ? 'Kemaskini' : 'Sahkan'}
+                </button>
+              </td>
+            </tr>
+          `;
+        });
       });
-    });
-    tbody.innerHTML = html;
-  }
-
-  async function doConfirm(rowIndex, studentIdx) {
-    const pwd = document.getElementById('adminPwd').value;
-    if (!pwd) {
-      alert('Sila masukkan Kata Laluan Admin!');
-      return;
-    }
-    try {
-      const res = await fetch(`${API_URL}?action=confirm&rowIndex=${rowIndex}&studentIdx=${studentIdx}&password=${encodeURIComponent(pwd)}`);
-      const json = await res.json();
-      showAlert(json.message, json.success);
-      if (json.success) loadData();
-    } catch (err) {
-      showAlert('Gagal mengesahkan: ' + err.message, false);
-    }
-  }
-
-  async function checkCert() {
-    const key = document.getElementById('certSearchInput').value;
-    const resDiv = document.getElementById('certResult');
-    resDiv.classList.add('hidden');
-
-    if (!key) {
-      showAlert('Sila masukkan PROJEK ID atau NO. MATRIK anda.', false);
-      return;
+      tbody.innerHTML = html;
     }
 
-    resDiv.innerHTML = '<div class="text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>Sedang menyemak sijil di Google Drive...</div>';
-    resDiv.classList.remove('hidden');
+    async function doConfirm(rowIndex, studentIdx) {
+      const pwd = document.getElementById('adminPwd').value;
+      if (!pwd) {
+        alert('Sila masukkan Kata Laluan Admin!');
+        return;
+      }
+      try {
+        const res = await fetch(`${API_URL}?action=confirm&rowIndex=${rowIndex}&studentIdx=${studentIdx}&password=${encodeURIComponent(pwd)}`);
+        const json = await res.json();
+        showAlert(json.message, json.success);
+        if (json.success) loadData();
+      } catch (err) {
+        showAlert('Gagal mengesahkan: ' + err.message, false);
+      }
+    }
 
-    try {
-      const res = await fetch(`${API_URL}?action=searchCert&key=${encodeURIComponent(key)}`);
-      const json = await res.json();
-      if (json.success) {
-        resDiv.innerHTML = `
-          <div class="text-center space-y-3">
-            <i class="fa-solid fa-circle-check text-emerald-500 text-4xl"></i>
-            <h3 class="text-lg font-bold text-slate-800">Sijil Penyertaan Ditemui!</h3>
-            <p class="text-sm text-slate-600"><strong>Nama:</strong> ${json.nama}<br><strong>Projek ID:</strong> ${json.projekId} | <strong>Matrik:</strong> ${json.noMatrik}</p>
-            <div class="pt-4 flex justify-center gap-3">
-              <a href="${json.downloadUrl}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl shadow text-sm inline-flex items-center gap-2">
-                <i class="fa-solid fa-download"></i> Muat Turun PDF
+    async function checkCert() {
+      if (certSearchGlobalStatus === 'OFF') {
+        showAlert('Akses carian sijil ditutup sementara oleh Urusetia.', false);
+        return;
+      }
+
+      const key = document.getElementById('certSearchInput').value;
+      const resDiv = document.getElementById('certResult');
+      resDiv.classList.add('hidden');
+
+      if (!key) {
+        showAlert('Sila masukkan PROJEK ID atau NO. MATRIK anda.', false);
+        return;
+      }
+
+      resDiv.innerHTML = '<div class="text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>Sedang menyemak sijil di Google Drive...</div>';
+      resDiv.classList.remove('hidden');
+
+      try {
+        const res = await fetch(`${API_URL}?action=searchCert&key=${encodeURIComponent(key)}`);
+        const json = await res.json();
+        if (json.success) {
+          let buttonsHtml = '';
+
+          // 1. Sijil Penyertaan (Lajur N)
+          if (json.linkSijil) {
+            buttonsHtml += `
+              <a href="${json.linkSijil}" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-3 rounded-xl shadow text-sm inline-flex justify-center items-center gap-2 transition">
+                <i class="fa-solid fa-file-pdf"></i> Muat Turun Sijil Penyertaan
               </a>
-              <a href="${json.viewUrl}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl shadow text-sm inline-flex items-center gap-2">
-                <i class="fa-solid fa-eye"></i> Papar di Drive
+            `;
+          }
+
+          // 2. Sijil Emas / Perak / Gangsa (Lajur O)
+          if (json.linkEmasPerakGangsa) {
+            buttonsHtml += `
+              <a href="${json.linkEmasPerakGangsa}" target="_blank" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-3 rounded-xl shadow text-sm inline-flex justify-center items-center gap-2 transition">
+                <i class="fa-solid fa-award"></i> Muat Turun Sijil Emas / Perak / Gangsa
               </a>
+            `;
+          }
+
+          // 3. Sijil Anugerah (Lajur P)
+          if (json.linkAnugerah) {
+            buttonsHtml += `
+              <a href="${json.linkAnugerah}" target="_blank" class="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold px-4 py-3 rounded-xl shadow text-sm inline-flex justify-center items-center gap-2 transition">
+                <i class="fa-solid fa-trophy"></i> Muat Turun Sijil Anugerah
+              </a>
+            `;
+          }
+
+          resDiv.innerHTML = `
+            <div class="text-center space-y-4">
+              <i class="fa-solid fa-circle-check text-emerald-500 text-4xl"></i>
+              <h3 class="text-lg font-bold text-slate-800">Sijil Berjaya Ditemui!</h3>
+              <p class="text-sm text-slate-600"><strong>Nama:</strong> ${json.nama}<br><strong>Projek ID:</strong> ${json.projekId} | <strong>Matrik:</strong> ${json.noMatrik}</p>
+              <div class="pt-2 flex flex-col gap-3">
+                ${buttonsHtml}
+              </div>
             </div>
-          </div>
-        `;
-      } else {
-        resDiv.innerHTML = `
-          <div class="text-center space-y-2 text-rose-600">
-            <i class="fa-solid fa-circle-xmark text-3xl"></i>
-            <div class="font-bold">Status: Tidak Dapat Dikeluarkan</div>
-            <p class="text-sm text-slate-600">${json.message}</p>
-          </div>
-        `;
+          `;
+        } else {
+          resDiv.innerHTML = `
+            <div class="text-center space-y-2 text-rose-600">
+              <i class="fa-solid fa-circle-xmark text-3xl"></i>
+              <div class="font-bold">Status: Sijil Tidak Dapat Dikeluarkan</div>
+              <p class="text-sm text-slate-600">${json.message}</p>
+            </div>
+          `;
+        }
+      } catch (err) {
+        resDiv.innerHTML = `<div class="text-center text-rose-600">Ralat carian: ${err.message}</div>`;
       }
-    } catch (err) {
-      resDiv.innerHTML = `<div class="text-center text-rose-600">Ralat carian: ${err.message}</div>`;
     }
-  }
-</script>
+  </script>
 </body>
 </html>

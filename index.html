@@ -49,6 +49,11 @@
         <p class="text-sm text-slate-500">Cari mengikut <strong>PROJEK ID (Lajur C)</strong> atau <strong>Nama Pelajar</strong>.</p>
       </div>
 
+      <!-- Mesej Amaran jika Pendaftaran Ditutup -->
+      <div id="regDisabledBox" class="hidden mb-6 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-center text-sm font-semibold">
+        <i class="fa-solid fa-lock text-amber-600 mr-2"></i> Tempoh pendaftaran kehadiran telah DITUTUP sementara oleh Urusetia / Admin.
+      </div>
+
       <div class="relative mb-6">
         <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400"></i>
         <input type="text" id="searchJk" onkeyup="filterParticipants()" placeholder="Taip PROJEK ID, Nama Pelajar, No. Matrik..." class="w-full pl-11 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -74,14 +79,23 @@
 
     <!-- TAB 2: URUSETIA / ADMIN -->
     <section id="tab2" class="tab-content hidden bg-white p-6 rounded-2xl shadow-md">
-      <div class="mb-6 flex flex-col md:flex-row justify-between md:items-center gap-4">
+      <div class="mb-6 flex flex-col xl:flex-row justify-between xl:items-center gap-4">
         <div>
           <h2 class="text-xl font-bold text-slate-800 mb-1">Pengesahan Kehadiran Urusetia</h2>
-          <p class="text-sm text-slate-500">Sahkan pendaftaran peserta di Lajur L & semak ketersediaan sijil (Lajur N, O, P).</p>
+          <p class="text-sm text-slate-500">Sahkan pendaftaran peserta di Lajur L & kawal status sistem.</p>
         </div>
         
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <!-- Panel Kawalan Carian Sijil Admin -->
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Panel Kawalan Pendaftaran (Tab 1) -->
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <span class="text-xs font-bold text-slate-700">Pendaftaran (Tab 1):</span>
+            <span id="badgeRegStatus" class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">ON</span>
+            <button onclick="toggleRegistrationStatus()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs px-2.5 py-1 rounded-lg font-medium transition">
+              Tukar (ON/OFF)
+            </button>
+          </div>
+
+          <!-- Panel Kawalan Carian Sijil (Tab 3) -->
           <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
             <span class="text-xs font-bold text-slate-700">Carian Sijil (Tab 3):</span>
             <span id="badgeCertStatus" class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">ON</span>
@@ -90,6 +104,7 @@
             </button>
           </div>
 
+          <!-- Input Kata Laluan -->
           <div class="flex items-center gap-2 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
             <i class="fa-solid fa-key text-amber-600"></i>
             <input type="password" id="adminPwd" placeholder="Kata Laluan Admin" class="px-3 py-1 border border-slate-300 rounded-lg text-sm focus:outline-none">
@@ -122,13 +137,12 @@
     <section id="tab3" class="tab-content hidden bg-white p-8 rounded-2xl shadow-md max-w-2xl mx-auto">
       <div class="text-center mb-8">
         <i class="fa-solid fa-file-pdf text-red-500 text-5xl mb-3"></i>
-        <h2 class="text-2xl font-bold text-slate-800">Muat Turun Sijil</h2>
+        <h2 class="text-2xl font-bold text-slate-800">Muat Turun Sijil Penyertaan</h2>
         <p class="text-sm text-slate-500 mt-1">Masukkan <strong>PROJEK ID</strong> (contoh: JKE02) atau <strong>NO. MATRIK</strong> anda.</p>
       </div>
 
-      <!-- Mesej Amaran jika Carian Ditutup oleh Admin -->
       <div id="certSearchDisabledBox" class="hidden mb-6 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-center text-sm font-semibold">
-        <i class="fa-solid fa-lock text-amber-600 mr-2"></i> Access Carian & Muat Turun Sijil DITUTUP sementara oleh Urusetia.
+        <i class="fa-solid fa-lock text-amber-600 mr-2"></i> Akses Carian & Muat Turun Sijil DITUTUP sementara oleh Urusetia.
       </div>
 
       <div id="certSearchContainer" class="space-y-4">
@@ -150,6 +164,7 @@
     const API_URL = 'https://script.google.com/macros/s/AKfycby3PdAsdtJ7mWwcbrUGlB8-CWB0E8534eEUeEP6OB-LyQ3h109p5jZEONDIZajrUr1C/exec'; 
     let participantsData = [];
     let certSearchGlobalStatus = 'ON';
+    let registrationGlobalStatus = 'ON';
 
     window.onload = function() {
       loadData();
@@ -166,9 +181,7 @@
       const activeBtn = document.getElementById('btn' + tabId.charAt(0).toUpperCase() + tabId.slice(1));
       activeBtn.classList.add('bg-blue-100', 'text-blue-900');
 
-      if (tabId === 'tab3') {
-        updateTab3SearchUI();
-      }
+      if (tabId === 'tab3') updateTab3SearchUI();
     }
 
     function showAlert(msg, isSuccess = true) {
@@ -186,7 +199,9 @@
         if (json.success) {
           participantsData = json.data;
           certSearchGlobalStatus = json.certSearchStatus || 'ON';
-          updateAdminCertControlUI();
+          registrationGlobalStatus = json.registrationStatus || 'ON';
+          
+          updateAdminControlUI();
           renderTables();
         } else {
           showAlert('Gagal membaca data: ' + json.message, false);
@@ -196,14 +211,28 @@
       }
     }
 
-    function updateAdminCertControlUI() {
-      const badge = document.getElementById('badgeCertStatus');
-      if (certSearchGlobalStatus === 'ON') {
-        badge.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800';
-        badge.innerText = 'ON (DIBUKA)';
+    function updateAdminControlUI() {
+      // 1. Kemaskini Badge Pendaftaran (Tab 1)
+      const badgeReg = document.getElementById('badgeRegStatus');
+      const regDisabledBox = document.getElementById('regDisabledBox');
+      if (registrationGlobalStatus === 'ON') {
+        badgeReg.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800';
+        badgeReg.innerText = 'ON (DIBUKA)';
+        regDisabledBox.classList.add('hidden');
       } else {
-        badge.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800';
-        badge.innerText = 'OFF (DITUTUP)';
+        badgeReg.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800';
+        badgeReg.innerText = 'OFF (DITUTUP)';
+        regDisabledBox.classList.remove('hidden');
+      }
+
+      // 2. Kemaskini Badge Carian Sijil (Tab 3)
+      const badgeCert = document.getElementById('badgeCertStatus');
+      if (certSearchGlobalStatus === 'ON') {
+        badgeCert.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800';
+        badgeCert.innerText = 'ON (DIBUKA)';
+      } else {
+        badgeCert.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800';
+        badgeCert.innerText = 'OFF (DITUTUP)';
       }
       updateTab3SearchUI();
     }
@@ -220,6 +249,27 @@
       }
     }
 
+    async function toggleRegistrationStatus() {
+      const pwd = document.getElementById('adminPwd').value;
+      if (!pwd) {
+        alert('Sila masukkan Kata Laluan Admin terlebih dahulu!');
+        return;
+      }
+      const newTargetStatus = registrationGlobalStatus === 'ON' ? 'OFF' : 'ON';
+      try {
+        const res = await fetch(`${API_URL}?action=toggleRegistration&password=${encodeURIComponent(pwd)}&status=${newTargetStatus}`);
+        const json = await res.json();
+        showAlert(json.message, json.success);
+        if (json.success) {
+          registrationGlobalStatus = json.status;
+          updateAdminControlUI();
+          renderTables();
+        }
+      } catch (err) {
+        showAlert('Ralat menukar status pendaftaran: ' + err.message, false);
+      }
+    }
+
     async function toggleCertSearchStatus() {
       const pwd = document.getElementById('adminPwd').value;
       if (!pwd) {
@@ -233,10 +283,10 @@
         showAlert(json.message, json.success);
         if (json.success) {
           certSearchGlobalStatus = json.status;
-          updateAdminCertControlUI();
+          updateAdminControlUI();
         }
       } catch (err) {
-        showAlert('Ralat menukar status: ' + err.message, false);
+        showAlert('Ralat menukar status carian sijil: ' + err.message, false);
       }
     }
 
@@ -296,6 +346,8 @@
         return;
       }
 
+      const isRegOpen = registrationGlobalStatus === 'ON';
+
       let html = '';
       data.forEach(item => {
         const students = parseStudentList(item.namaPelajar, item.noMatrik);
@@ -324,9 +376,13 @@
                   : `<span class="bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full text-xs font-medium">Belum Mendaftar</span>`}
               </td>
               <td class="p-3 text-center">
-                <button onclick="registerStudent('${item.rowIndex}', ${sIdx})" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg shadow font-medium transition flex items-center gap-1 mx-auto">
-                  <i class="fa-solid fa-user-check"></i> ${isRegistered ? 'Kemaskini Masa' : 'Daftar Pelajar Ini'}
-                </button>
+                ${isRegOpen 
+                  ? `<button onclick="registerStudent('${item.rowIndex}',${sIdx})" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg shadow font-medium transition flex items-center gap-1 mx-auto">
+                      <i class="fa-solid fa-user-check"></i> ${isRegistered ? 'Kemaskini Masa' : 'Daftar Pelajar Ini'}
+                     </button>`
+                  : `<button disabled class="bg-slate-300 text-slate-500 text-xs px-3 py-1.5 rounded-lg font-medium cursor-not-allowed flex items-center gap-1 mx-auto">
+                      <i class="fa-solid fa-lock"></i> Ditutup
+                     </button>`}
               </td>
             </tr>
           `;
@@ -346,6 +402,10 @@
     }
 
     async function registerStudent(rowIndex, studentIdx) {
+      if (registrationGlobalStatus === 'OFF') {
+        showAlert('Pendaftaran telah ditutup oleh Urusetia / Admin.', false);
+        return;
+      }
       try {
         const res = await fetch(`${API_URL}?action=registerStudent&rowIndex=${rowIndex}&studentIdx=${studentIdx}`);
         const json = await res.json();
@@ -465,7 +525,6 @@
         if (json.success) {
           let buttonsHtml = '';
 
-          // 1. Sijil Penyertaan (Lajur N)
           if (json.linkSijil) {
             buttonsHtml += `
               <a href="${json.linkSijil}" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-3 rounded-xl shadow text-sm inline-flex justify-center items-center gap-2 transition">
@@ -474,7 +533,6 @@
             `;
           }
 
-          // 2. Sijil Emas / Perak / Gangsa (Lajur O)
           if (json.linkEmasPerakGangsa) {
             buttonsHtml += `
               <a href="${json.linkEmasPerakGangsa}" target="_blank" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-3 rounded-xl shadow text-sm inline-flex justify-center items-center gap-2 transition">
@@ -483,7 +541,6 @@
             `;
           }
 
-          // 3. Sijil Anugerah (Lajur P)
           if (json.linkAnugerah) {
             buttonsHtml += `
               <a href="${json.linkAnugerah}" target="_blank" class="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold px-4 py-3 rounded-xl shadow text-sm inline-flex justify-center items-center gap-2 transition">

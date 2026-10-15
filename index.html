@@ -49,7 +49,6 @@
         <p class="text-sm text-slate-500">Cari mengikut <strong>PROJEK ID (Lajur C)</strong> atau <strong>Nama Pelajar</strong>.</p>
       </div>
 
-      <!-- Mesej Amaran jika Pendaftaran Ditutup -->
       <div id="regDisabledBox" class="hidden mb-6 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-center text-sm font-semibold">
         <i class="fa-solid fa-lock text-amber-600 mr-2"></i> Tempoh pendaftaran kehadiran telah DITUTUP sementara oleh Urusetia / Admin.
       </div>
@@ -82,30 +81,27 @@
       <div class="mb-6 flex flex-col xl:flex-row justify-between xl:items-center gap-4">
         <div>
           <h2 class="text-xl font-bold text-slate-800 mb-1">Pengesahan Kehadiran Urusetia</h2>
-          <p class="text-sm text-slate-500">Sahkan pendaftaran peserta di Lajur L & kawal status sistem.</p>
+          <p class="text-sm text-slate-500">Semak masa maklum balas Refleksi (Lajur L) & status ketersediaan sijil (Lajur N, O, P).</p>
         </div>
         
         <div class="flex flex-wrap items-center gap-3">
-          <!-- Panel Kawalan Pendaftaran (Tab 1) -->
-          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-            <span class="text-xs font-bold text-slate-700">Pendaftaran (Tab 1):</span>
-            <span id="badgeRegStatus" class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">ON</span>
-            <button onclick="toggleRegistrationStatus()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs px-2.5 py-1 rounded-lg font-medium transition">
-              Tukar (ON/OFF)
-            </button>
+          <button onclick="syncRefleksiData()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded-xl font-semibold shadow flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-sync"></i> Sync Auto Maklum Balas & Sijil
+          </button>
+
+          <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200 text-xs">
+            <span class="font-bold text-slate-700">Pendaftaran (Tab 1):</span>
+            <span id="badgeRegStatus" class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">ON</span>
+            <button onclick="toggleRegistrationStatus()" class="bg-slate-800 hover:bg-slate-900 text-white px-2 py-1 rounded-lg transition">Tukar</button>
           </div>
 
-          <!-- Panel Kawalan Carian Sijil (Tab 3) -->
-          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-            <span class="text-xs font-bold text-slate-700">Carian Sijil (Tab 3):</span>
-            <span id="badgeCertStatus" class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">ON</span>
-            <button onclick="toggleCertSearchStatus()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs px-2.5 py-1 rounded-lg font-medium transition">
-              Tukar (ON/OFF)
-            </button>
+          <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200 text-xs">
+            <span class="font-bold text-slate-700">Carian Sijil (Tab 3):</span>
+            <span id="badgeCertStatus" class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">ON</span>
+            <button onclick="toggleCertSearchStatus()" class="bg-slate-800 hover:bg-slate-900 text-white px-2 py-1 rounded-lg transition">Tukar</button>
           </div>
 
-          <!-- Input Kata Laluan -->
-          <div class="flex items-center gap-2 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+          <div class="flex items-center gap-2 bg-amber-50 p-2 rounded-xl border border-amber-200">
             <i class="fa-solid fa-key text-amber-600"></i>
             <input type="password" id="adminPwd" placeholder="Kata Laluan Admin" class="px-3 py-1 border border-slate-300 rounded-lg text-sm focus:outline-none">
           </div>
@@ -119,7 +115,7 @@
               <th class="p-3">Projek ID</th>
               <th class="p-3">Nama Pelajar</th>
               <th class="p-3">Masa Daftar (Lajur K)</th>
-              <th class="p-3">Pengesahan (Lajur L)</th>
+              <th class="p-3">Masa Maklum Balas Refleksi (Lajur L)</th>
               <th class="p-3">Sijil Penyertaan (Lajur N)</th>
               <th class="p-3">Sijil Emas/Perak/Gangsa (Lajur O)</th>
               <th class="p-3">Sijil Anugerah (Lajur P)</th>
@@ -137,7 +133,7 @@
     <section id="tab3" class="tab-content hidden bg-white p-8 rounded-2xl shadow-md max-w-2xl mx-auto">
       <div class="text-center mb-8">
         <i class="fa-solid fa-file-pdf text-red-500 text-5xl mb-3"></i>
-        <h2 class="text-2xl font-bold text-slate-800">Muat Turun Sijil Penyertaan</h2>
+        <h2 class="text-2xl font-bold text-slate-800">Muat Turun Sijil</h2>
         <p class="text-sm text-slate-500 mt-1">Masukkan <strong>PROJEK ID</strong> (contoh: JKE02) atau <strong>NO. MATRIK</strong> anda.</p>
       </div>
 
@@ -211,28 +207,43 @@
       }
     }
 
+    async function syncRefleksiData() {
+      const pwd = document.getElementById('adminPwd').value;
+      if (!pwd) {
+        alert('Sila masukkan Kata Laluan Admin terlebih dahulu!');
+        return;
+      }
+      try {
+        showAlert('Sedang membuat semakan auto maklum balas Refleksi & fail Sijil...', true);
+        const res = await fetch(`${API_URL}?action=syncFeedback&password=${encodeURIComponent(pwd)}`);
+        const json = await res.json();
+        showAlert(json.message, json.success);
+        if (json.success) loadData();
+      } catch (err) {
+        showAlert('Ralat proses sync: ' + err.message, false);
+      }
+    }
+
     function updateAdminControlUI() {
-      // 1. Kemaskini Badge Pendaftaran (Tab 1)
       const badgeReg = document.getElementById('badgeRegStatus');
       const regDisabledBox = document.getElementById('regDisabledBox');
       if (registrationGlobalStatus === 'ON') {
-        badgeReg.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800';
-        badgeReg.innerText = 'ON (DIBUKA)';
+        badgeReg.className = 'px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800';
+        badgeReg.innerText = 'ON';
         regDisabledBox.classList.add('hidden');
       } else {
-        badgeReg.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800';
-        badgeReg.innerText = 'OFF (DITUTUP)';
+        badgeReg.className = 'px-2 py-0.5 rounded-full font-bold bg-rose-100 text-rose-800';
+        badgeReg.innerText = 'OFF';
         regDisabledBox.classList.remove('hidden');
       }
 
-      // 2. Kemaskini Badge Carian Sijil (Tab 3)
       const badgeCert = document.getElementById('badgeCertStatus');
       if (certSearchGlobalStatus === 'ON') {
-        badgeCert.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800';
-        badgeCert.innerText = 'ON (DIBUKA)';
+        badgeCert.className = 'px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800';
+        badgeCert.innerText = 'ON';
       } else {
-        badgeCert.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800';
-        badgeCert.innerText = 'OFF (DITUTUP)';
+        badgeCert.className = 'px-2 py-0.5 rounded-full font-bold bg-rose-100 text-rose-800';
+        badgeCert.innerText = 'OFF';
       }
       updateTab3SearchUI();
     }
@@ -448,8 +459,8 @@
               <td class="p-3 text-slate-600">${cleanRegDate || '<span class="text-rose-500">Belum Daftar</span>'}</td>
               <td class="p-3">
                 ${isConfirmed 
-                  ? `<span class="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full font-semibold inline-flex items-center gap-1"><i class="fa-solid fa-certificate"></i> ${cleanConfDate}</span>` 
-                  : `<span class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-medium">Belum Disahkan</span>`}
+                  ? `<span class="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full font-semibold inline-flex items-center gap-1"><i class="fa-solid fa-comment-dots text-blue-600"></i> ${cleanConfDate}</span>` 
+                  : `<span class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-medium">Belum Refleksi</span>`}
               </td>
               
               <!-- Lajur N: Sijil Penyertaan -->
